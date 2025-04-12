@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Global Knowledge Campus - Registration Statistics</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    main { flex: 1; }
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    body {
+      font-family: 'Handlee', cursive;
+      background: linear-gradient(-45deg, #000, #1a1a1a, #333, #4d4d4d);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      padding: 20px;
+      color: #fff;
+      box-sizing: border-box;
+    }
+    h1 { text-align: center; }
+    .stats-container {
+      max-width: 800px;
+      width: 80%;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      color: #333;
+    }
+    .stats-container p { font-size: 18px; margin: 8px 0; }
+    .list-container { margin-top: 20px; }
+    .list-item {
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-group {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .btn-group button {
+      background: #2575fc;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      margin: 0 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn-group button:hover { background: #1a5bb8; }
+    footer {
+      background: #ececec;
+      text-align: center;
+      padding: 10px;
+      color: #333;
+      font-weight: bold;
+      margin-top: auto;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Registration Statistics</h1>
+    <div class="stats-container" id="statsContainer">
+      <!-- Overall statistics will be loaded here -->
+    </div>
+    <div class="list-container" id="listContainer">
+      <!-- List of registrants with coupon scan status and food preference -->
+    </div>
+    <div class="btn-group">
+      <button onclick="window.location.href='manager.html'">Back to Dashboard</button>
+      <button id="logoutStats">Logout</button>
+    </div>
+  </main>
+  <footer>All rights reserved - Dhruba Majumder</footer>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+  
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert("You must be logged in as a manager to view this page.");
+        window.location.href = "manager.html";
+        return;
+      }
+      const tokenResult = await user.getIdTokenResult();
+      if (!tokenResult.claims.manager) {
+        alert("Access denied. You are not authorized to view this page.");
+        auth.signOut();
+        window.location.href = "manager.html";
+        return;
+      }
+      loadStats();
+    });
+  
+    function loadStats() {
+      db.collection("users").onSnapshot((snapshot) => {
+        let totalAttending = 0, totalScanned = 0, totalNotScanned = 0;
+        let registrants = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.attendance === "yes") {
+            totalAttending++;
+            if (data.couponScanned) totalScanned++;
+            else totalNotScanned++;
+            registrants.push({ name: data.name, meal: data.meal, scanned: data.couponScanned });
+          }
+        });
+        document.getElementById("statsContainer").innerHTML = `
+          <p><strong>Total Attending (Coupons Generated):</strong> ${totalAttending}</p>
+          <p><strong>Coupons Scanned:</strong> ${totalScanned}</p>
+          <p><strong>Coupons Not Scanned:</strong> ${totalNotScanned}</p>
+        `;
+        let listHTML = "<h3>Registrants:</h3>";
+        registrants.forEach(item => {
+          let mark = item.scanned ? '<span style="color:green; font-size:20px;">✓</span>' : '<span style="color:red; font-size:20px;">❌</span>';
+          listHTML += `<div class="list-item">
+                          <span>${item.name} (${item.meal})</span>
+                          <span>${mark}</span>
+                       </div>`;
+        });
+        document.getElementById("listContainer").innerHTML = listHTML;
+      });
+    }
+  
+    document.getElementById("logoutStats").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        window.location.href = "thankyou.html";
+      });
+    });
+  </script>
+</body>
+</html>

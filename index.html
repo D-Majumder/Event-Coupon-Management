@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Global Knowledge Campus - Farewell Registration</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <!-- Google Font: Handlee -->
+  <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+  <style>
+    /* Flex layout for sticky footer */
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    main { flex: 1; }
+    /* Dark gradient background animation */
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    body {
+      font-family: 'Handlee', cursive;
+      background: linear-gradient(-45deg, #000, #1a1a1a, #333, #4d4d4d);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      color: #fff;
+      align-items: center;
+      box-sizing: border-box;
+      padding: 20px;
+    }
+    h1 {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 2em;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 30px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 1000px;
+      margin: 20px auto;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      .container {
+        width: 100%;
+        margin: 10px;
+        padding: 15px;
+      }
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      border: none;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #2575fc;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    button:hover { background: #1a5bb8; }
+    .toggle {
+      text-align: center;
+      margin: 10px;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 1em;
+    }
+    .hidden { display: none; }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 1em;
+    }
+    .radio-group { margin-bottom: 15px; }
+    footer {
+      background: rgba(0,0,0,0.6);
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      color: #fff;
+      font-weight: bold;
+      box-sizing: border-box;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Global Knowledge Campus</h1>
+    
+    <!-- Registration Form -->
+    <div class="container" id="registrationContainer">
+      <h2>Register for Farewell Event</h2>
+      <form id="registrationForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+
+        <label for="rollNumber">Roll Number:</label>
+        <input type="text" id="rollNumber" required>
+
+        <label for="phone">Phone Number:</label>
+        <input type="tel" id="phone" required>
+
+        <label for="emailReg">Email:</label>
+        <input type="email" id="emailReg" required>
+
+        <label for="passwordReg">Password:</label>
+        <input type="password" id="passwordReg" required>
+
+        <!-- Attendance is fixed as "yes" -->
+        <input type="hidden" id="attendance" value="yes">
+
+        <div id="mealOptions">
+          <label>Meal Preference:</label>
+          <input type="radio" id="veg" name="meal" value="Veg" required> Veg
+          <input type="radio" id="nonVeg" name="meal" value="Non-Veg" required> Non-Veg
+        </div>
+
+        <button type="submit">Register</button>
+      </form>
+      <p class="toggle" id="showLogin">Already registered? Click here to login</p>
+    </div>
+    
+    <!-- Login Form -->
+    <div class="container hidden" id="loginContainer">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <label for="emailLogin">Email:</label>
+        <input type="email" id="emailLogin" required>
+        <label for="passwordLogin">Password:</label>
+        <input type="password" id="passwordLogin" required>
+        <button type="submit">Login</button>
+      </form>
+      <p class="toggle" id="forgotPassword">Forgot Password?</p>
+      <p class="toggle" id="showRegister">Don't have an account? Click here to register</p>
+    </div>
+    
+    <!-- Manager Login Button -->
+    <p style="text-align:center; margin-top:20px;">
+      <button onclick="window.location.href='manager.html'" style="background:#ff6a00; border:none; border-radius:4px; padding:10px 20px; cursor:pointer;">Manager Login</button>
+    </p>
+  </main>
+  
+  <footer>All rights reserved - Dhruba Majumder</footer>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Block temporary email domains
+    const blockedDomains = ["tempmail.com", "10minutemail.com", "mailinator.com", "guerrillamail.com"];
+    document.getElementById("emailReg").addEventListener("blur", function() {
+      const email = this.value;
+      if (email.indexOf("@") !== -1) {
+        const domain = email.split("@")[1].toLowerCase();
+        if (blockedDomains.includes(domain)) {
+          alert("Temporary emails are not allowed. Please use a valid email.");
+          this.value = "";
+        }
+      }
+    });
+
+    // Toggle between registration and login forms
+    const registrationContainer = document.getElementById('registrationContainer');
+    const loginContainer = document.getElementById('loginContainer');
+    document.getElementById('showLogin').addEventListener('click', () => {
+      registrationContainer.classList.add('hidden');
+      loginContainer.classList.remove('hidden');
+    });
+    document.getElementById('showRegister').addEventListener('click', () => {
+      loginContainer.classList.add('hidden');
+      registrationContainer.classList.remove('hidden');
+    });
+
+    // Registration form submission
+    document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const attendance = document.getElementById('attendance').value;  // always "yes"
+      const name = document.getElementById('name').value;
+      const roll = document.getElementById('rollNumber').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('emailReg').value;
+      const password = document.getElementById('passwordReg').value;
+      const meal = document.querySelector('input[name="meal"]:checked').value;
+      let couponId = "";
+      try {
+        const result = await auth.createUserWithEmailAndPassword(email, password);
+        const uid = result.user.uid;
+        couponId = uid; // Using uid as couponId
+        await db.collection('users').doc(uid).set({
+          name,
+          roll,
+          phone,
+          email,
+          attendance,
+          meal,
+          couponId,
+          couponScanned: false
+        });
+        await result.user.sendEmailVerification();
+        alert("Registration successful! A verification email has been sent. Please verify before logging in.");
+        window.location.href = 'coupon.html';
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          alert("This email is already registered. Please use a different email or log in.");
+        } else {
+          alert("Error: " + error.message);
+        }
+      }
+    });
+
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('emailLogin').value;
+      const password = document.getElementById('passwordLogin').value;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        alert('Login successful!');
+        window.location.href = 'coupon.html';
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    // Forgot Password functionality
+    document.getElementById('forgotPassword').addEventListener('click', async () => {
+      const email = prompt('Please enter your registered email:');
+      if (email) {
+        try {
+          await auth.sendPasswordResetEmail(email);
+          alert('Password reset email sent!');
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

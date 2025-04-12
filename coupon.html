@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Global Knowledge Campus - Your Coupon</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    main { flex: 1; }
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    body {
+      font-family: 'Handlee', cursive;
+      background: linear-gradient(-45deg, #000, #1a1a1a, #333, #4d4d4d);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      padding: 30px 10px;
+      color: #fff;
+      box-sizing: border-box;
+      align-items: center;
+    }
+    h1 { text-align: center; }
+    .content-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      max-width: 800px;
+      width: 80%;
+      text-align: center;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .qr-section {
+      margin: 20px auto;
+    }
+    .user-details {
+      margin: 10px;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #333;
+    }
+    /* Updated coupon-id style with black text */
+    .coupon-id {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #000;
+    }
+    button {
+      padding: 10px 20px;
+      background: #2575fc;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover { background: #1a5bb8; }
+    footer {
+      background: #ececec;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      color: #333;
+      font-weight: bold;
+      box-sizing: border-box;
+      margin-top: auto;
+    }
+    @media (max-width:600px) {
+      .content-container { width: 90%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Your Registration Details</h1>
+    <div class="content-container" id="contentContainer">
+      <!-- Content will be dynamically inserted here -->
+    </div>
+    <button id="logoutBtn">Logout</button>
+  </main>
+  <footer>All rights reserved - Dhruba Majumder</footer>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <!-- QRCode.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert("You must be logged in to view this page.");
+        window.location.href = "index.html";
+        return;
+      }
+      const docRef = db.collection("users").doc(user.uid);
+      const docSnap = await docRef.get();
+      const contentContainer = document.getElementById("contentContainer");
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        if (data.attendance === "yes") {
+          contentContainer.innerHTML = `
+            <div class="qr-section" id="qrcode"></div>
+            <div class="user-details">
+              <p><strong>Name:</strong> ${data.name}</p>
+              <p><strong>Roll Number:</strong> ${data.roll}</p>
+              <p><strong>Meal Preference:</strong> ${data.meal ? data.meal : "N/A"}</p>
+            </div>
+            <p class="coupon-id">Your Coupon ID: ${data.couponId}</p>
+          `;
+          if (data.couponId) {
+            new QRCode(document.getElementById("qrcode"), {
+              text: data.couponId,
+              width: 180,
+              height: 180
+            });
+          } else {
+            document.getElementById("qrcode").innerText = "No coupon generated";
+          }
+        } else {
+          contentContainer.innerHTML = `
+            <p style="font-size:20px;"><strong>Thank you, ${data.name}!</strong></p>
+            <p style="font-size:18px;">Thankyou for using our service. For any report or feedback you can reach out to me -<br>
+              Dhruba Majumder, Stream- BCA, Year- 2nd.</p>
+          `;
+        }
+      }
+    });
+    
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        window.location.href = "thankyou.html";
+      });
+    });
+  </script>
+</body>
+</html>

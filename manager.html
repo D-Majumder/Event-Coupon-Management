@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Global Knowledge Campus - Manager Dashboard</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    main { flex: 1; }
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    body {
+      font-family: 'Handlee', cursive;
+      background: linear-gradient(-45deg, #000, #1a1a1a, #333, #4d4d4d);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      padding: 20px;
+      color: #fff;
+      box-sizing: border-box;
+      align-items: center;
+    }
+    h1 { text-align: center; }
+    .container {
+      background: #fff;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 800px;
+      box-sizing: border-box;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    @media (max-width:600px) {
+      .container { width: 100%; margin: 10px; padding: 15px; }
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    button {
+      padding: 10px;
+      width: 100%;
+      background: #2575fc;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    button:hover { background: #1a5bb8; }
+    #result, #manualResult {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f7f7f7;
+      border-radius: 4px;
+      text-align: center;
+      color: #333;
+    }
+    #reader { width: 100%; margin-top: 20px; }
+    .hidden { display: none; }
+    footer {
+      background: #ececec;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      color: #333;
+      font-weight: bold;
+      margin-top: auto;
+      box-sizing: border-box;
+    }
+    /* Manual validation container style */
+    #manualValidationContainer {
+      margin-top: 20px;
+    }
+    #manualValidationContainer input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Manager Dashboard</h1>
+    <div class="container" id="loginDiv">
+      <h2>Manager Login</h2>
+      <form id="managerLoginForm">
+        <input type="email" id="managerEmail" placeholder="Manager Email" required />
+        <input type="password" id="managerPassword" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  
+    <div class="container hidden" id="scannerDiv">
+      <h2>Scan Coupon</h2>
+      <div id="reader"></div>
+      <div id="result"></div>
+      
+      <!-- Manual Validation Section -->
+      <div id="manualValidationContainer">
+        <h3>Manual Coupon Validation</h3>
+        <input type="text" id="manualCouponInput" placeholder="Enter coupon code">
+        <button id="validateManualBtn">Validate Coupon</button>
+        <div id="manualResult"></div>
+      </div>
+      
+      <button id="logoutManager">Logout</button>
+      <p style="text-align:center; margin-top:10px;">
+        <button onclick="window.location.href='stats.html'" style="background:#ff6a00; border:none; border-radius:4px; padding:10px 20px; cursor:pointer;">View Stats</button>
+      </p>
+    </div>
+  </main>
+  <footer>All rights reserved - Dhruba Majumder</footer>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <!-- HTML5 QR Code library (unversioned) -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  
+    const loginDiv = document.getElementById('loginDiv');
+    const scannerDiv = document.getElementById('scannerDiv');
+    const resultDiv = document.getElementById('result');
+  
+    // Manager login event
+    document.getElementById('managerLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('managerEmail').value;
+      const password = document.getElementById('managerPassword').value;
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const idTokenResult = await userCredential.user.getIdTokenResult();
+        if (!idTokenResult.claims.manager) {
+          alert("Access Denied. You are not authorized as a manager.");
+          auth.signOut();
+          return;
+        }
+        loginDiv.classList.add('hidden');
+        scannerDiv.classList.remove('hidden');
+        startScanner();
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+  
+    // QR code scanner function
+    function startScanner() {
+      const html5QrCode = new Html5Qrcode("reader");
+      const qrCodeSuccessCallback = async (decodedText, decodedResult) => {
+        html5QrCode.stop();
+        try {
+          const snapshot = await db.collection('users')
+            .where('couponId', '==', decodedText)
+            .get();
+          if (snapshot.empty) {
+            resultDiv.innerHTML = `<span style="color:red; font-size:20px;">❌ Coupon not found!</span>`;
+          } else {
+            const doc = snapshot.docs[0];
+            const data = doc.data();
+            if (data.couponScanned) {
+              resultDiv.innerHTML = `<span style="color:red; font-size:20px;">❌ Coupon has already been used!</span>`;
+            } else {
+              resultDiv.innerHTML = `<span style="color:green; font-size:20px;">✓ Valid Coupon</span><br>
+                                     <span style="font-size:18px;">Food Preference: ${data.meal ? data.meal : "N/A"}</span>`;
+              await doc.ref.update({ couponScanned: true });
+            }
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+        }
+        setTimeout(() => {
+          resultDiv.innerHTML = "";
+          startScanner();
+        }, 5000);
+      };
+  
+      const config = { fps: 10, qrbox: 250 };
+      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+        .catch((err) => { resultDiv.innerHTML = `<span style="color:red;">Unable to start scanning: ${err}</span>`; });
+    }
+  
+    // Manual validation
+    document.getElementById('validateManualBtn').addEventListener('click', async () => {
+      const manualCoupon = document.getElementById('manualCouponInput').value.trim();
+      const manualResult = document.getElementById('manualResult');
+      if (!manualCoupon) {
+        manualResult.innerHTML = `<span style="color:red;">Please enter a coupon code.</span>`;
+        return;
+      }
+      try {
+        const snapshot = await db.collection('users')
+          .where('couponId', '==', manualCoupon)
+          .get();
+        if (snapshot.empty) {
+          manualResult.innerHTML = `<span style="color:red; font-size:20px;">❌ Coupon not found!</span>`;
+        } else {
+          const doc = snapshot.docs[0];
+          const data = doc.data();
+          if (data.couponScanned) {
+            manualResult.innerHTML = `<span style="color:red; font-size:20px;">❌ Coupon has already been used!</span>`;
+          } else {
+            manualResult.innerHTML = `<span style="color:green; font-size:20px;">✓ Valid Coupon</span>`;
+            await doc.ref.update({ couponScanned: true });
+          }
+        }
+      } catch (error) {
+        manualResult.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+      }
+      document.getElementById('manualCouponInput').value = "";
+      setTimeout(() => { manualResult.innerHTML = ""; }, 5000);
+    });
+  
+    document.getElementById('logoutManager').addEventListener('click', () => {
+      auth.signOut().then(() => { window.location.href = 'thankyou.html'; });
+    });
+  </script>
+</body>
+</html>
