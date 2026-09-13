@@ -1,49 +1,51 @@
-<h1 align="center" id="title">Event Coupon Management</h1>
+# Event Coupon Management
 
-<p align="center"><img src="https://socialify.git.ci/D-Majumder/Event-Coupon-Management/image?custom_description=A+fully+responsive+web+application+for+the+farewell+event+at+Global+Knowledge+Campus.+This+platform+provides+an+easy+registration+process+for+event+attendees+and+generates+unique+QR-code+coupons+for+those+confirmed+to+attend.+A+secure+manager+portal+is+included+for+coupon+verification%E2%80%94both+through+live+QR+scanning+as+well+as+manual+input%E2%80%94with+real-time+statistics+on+attendance+and+coupon+usage.&amp;description=1&amp;language=1&amp;name=1&amp;owner=1&amp;stargazers=1&amp;theme=Light" alt="project-image"></p>
+A responsive web application for the farewell event at Global Knowledge Campus.
 
-<p id="description">A fully responsive web application for the farewell event at Global Knowledge Campus. This platform provides an easy registration process for event attendees and generates unique QR-code coupons for those confirmed to attend. A secure manager portal is included for coupon verification—both through live QR scanning as well as manual input—with real-time statistics on attendance and coupon usage.</p>
+## Live demo
 
-<p align="center"><img src="https://img.shields.io/badge/Event-Coupon-Red" alt="shields"></p>
+https://bcacoupon.pages.dev/
 
-<h2>🚀 Demo</h2>
+## Overview
 
-[https://bcacoupon.pages.dev/](https://bcacoupon.pages.dev/)
+This platform provides a registration process for event attendees and generates unique QR-code coupons for confirmed attendees. A secure manager portal is included for coupon verification — both through live QR scanning and manual input — with real-time statistics on attendance and coupon usage.
 
-  
-  
-<h2>🧐 Features</h2>
+## Features
 
-Here're some of the project's best features:
+- **Event registration and login** — attendees register and log in with their details (name, roll number, phone number, email, password, and meal preference). The system automatically marks attendance as confirmed to generate a coupon.
+- **Coupon generation** — a unique coupon ID is generated per attendee, with a QR code created via the QRCode.js library, and the coupon ID also shown in readable text.
+- **Manager portal** — managers log in and access a dashboard for coupon verification via:
+  - **Live QR code scanner** — using the HTML5 QR Code library.
+  - **Manual coupon validation** — an input box to manually enter and validate a coupon ID.
+- **Real-time statistics** — a statistics page shows total attendees (coupons generated), coupons scanned, coupons not scanned, and a detailed registrant list with meal preference and scan status.
+- **Navigation** — every page includes navigation; a thank-you page serves as the post-logout landing page with links back to registration/login and the manager portal.
 
-*   Event Registration and Login Attendees can register and log in with their details (name roll number phone number email password and meal preference). The system automatically marks attendance as “yes” to generate a coupon.
-*   Coupon Generation For every registered attendee a unique coupon ID is generated. A QR code is created using the QRCode.js library and the coupon ID is also displayed in clear readable black text.
-*   Manager Portal Managers can log in using their credentials access a dedicated dashboard for coupon verification and use the following verification methods: Live QR Code Scanner: Utilizes the HTML5 QR Code library (via the unversioned URL) to scan and verify coupons. Manual Coupon Validation: Provides an input box where a manager can manually enter a coupon ID to validate it.
-*   Real-Time Statistics A statistics page displays real-time data: Total number of attendees (coupons generated) Coupons scanned Coupons not scanned A detailed list of registrants including their meal preference and whether their coupon has been scanned (using visual indicators such as a green check (✓) or a red cross (❌))
-*   User-Friendly Navigation Every page includes navigation buttons for a smooth user experience. The Thank You page serves as the landing page after logout and contains links back to the registration/login and manager portals.
+## Tech stack
 
-<h2>🛠️ Installation Steps:</h2>
+HTML, JavaScript, Firebase (for registration/coupon data), QRCode.js, HTML5 QR Code scanning library.
 
-<p>1. Clone the Repository</p>
+## Setup
 
-```
-git clone https://github.com/yourusername/your-repo-name.git cd your-repo-name
-```
-
-<p>2. Configure Firebase</p>
-
-```
-const firebaseConfig = {   apiKey: "YOUR_API_KEY"   authDomain: "YOUR_PROJECT_ID.firebaseapp.com"   projectId: "YOUR_PROJECT_ID"   storageBucket: "YOUR_PROJECT_ID.appspot.com"   messagingSenderId: "YOUR_SENDER_ID"   appId: "YOUR_APP_ID" };
+```bash
+git clone https://github.com/D-Majumder/Event-Coupon-Management.git
+cd Event-Coupon-Management
 ```
 
-<p>3. Add Favicon</p>
+Configure your own Firebase project and replace the placeholder config in the source:
 
+```js
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 ```
-Place your favicon.ico file in the root of the project.
-```
 
-<p>4. Customize Allowed Roll Numbers (Optional):</p>
+Place your own `favicon.ico` in the project root, then serve the folder with any static file server.
 
-<h2>🛡️ License:</h2>
+## License
 
-This project is licensed under the MIT
+This project is licensed under the **MIT License**. See [LICENSE](./LICENSE) for the full text.
