@@ -27,8 +27,8 @@ HTML, JavaScript, Firebase (for registration/coupon data), QRCode.js, HTML5 QR C
 ## Setup
 
 ```bash
-git clone https://github.com/D-Majumder/Event-Coupon-Management.git
-cd Event-Coupon-Management
+git clone https://github.com/D-Majumder/event-coupon-management.git
+cd event-coupon-management
 ```
 
 Configure your own Firebase project and replace the placeholder config in the source:
